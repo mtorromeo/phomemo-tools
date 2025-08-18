@@ -10,10 +10,12 @@ install:
 	install -D ppd/Phomemo-M02Pro.ppd.gz -t $(DESTDIR)/usr/share/cups/model/Phomemo
 	install -D ppd/Phomemo-T02.ppd.gz -t $(DESTDIR)/usr/share/cups/model/Phomemo
 	install -D ppd/Phomemo-D30.ppd.gz -t $(DESTDIR)/usr/share/cups/model/Phomemo
+	install -D ppd/Phomemo-D35.ppd.gz -t $(DESTDIR)/usr/share/cups/model/Phomemo
 	install -D drv/phomemo-m110.drv -t $(DESTDIR)/usr/share/cups/drv/
 	install -D drv/phomemo-m110s.drv -t $(DESTDIR)/usr/share/cups/drv/
 	install -D drv/phomemo-m220.drv -t $(DESTDIR)/usr/share/cups/drv/
 	install -D drv/phomemo-d30.drv -t $(DESTDIR)/usr/share/cups/drv/
+	install -D drv/phomemo-d35.drv -t $(DESTDIR)/usr/share/cups/drv/
 	install -D ppd/Phomemo-M110.ppd.gz -t $(DESTDIR)/usr/share/cups/model/Phomemo
 	install -D ppd/Phomemo-M110S.ppd.gz -t $(DESTDIR)/usr/share/cups/model/Phomemo
 	install -D ppd/Phomemo-M220.ppd.gz -t $(DESTDIR)/usr/share/cups/model/Phomemo

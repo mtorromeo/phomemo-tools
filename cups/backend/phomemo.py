@@ -21,7 +21,7 @@ def scan_bluetooth():
         print("WARNING: no bluetooth interface", file=sys.stderr)
         return
 
-    re_name_pattern = re.compile(r'^(Mr\.in(.*)|Q[0-9]{3}[A-Z][0-9]{10}|T02)$')
+    re_name_pattern = re.compile(r'^(Mr\.in(.*)|Q[0-9]{3}[A-Z][0-9]{10}|T02|D3[05])$')
 
     manager = dbus.Interface(bluez, 'org.freedesktop.DBus.ObjectManager')
 
