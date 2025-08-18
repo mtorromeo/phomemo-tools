@@ -1,11 +1,11 @@
 #! /usr/bin/python3
 
-import sys
 import os
-import subprocess
-import dbus
 import socket
+import sys
 from urllib.parse import quote
+
+import dbus
 
 bus = dbus.SystemBus()
 
