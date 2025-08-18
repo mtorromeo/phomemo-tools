@@ -20,6 +20,7 @@ FILES += cups/drv/phomemo-m02pro.drv
 FILES += cups/drv/phomemo-m110.drv
 FILES += cups/drv/phomemo-d30.drv
 FILES += cups/drv/phomemo-m220.drv
+FILES += cups/drv/phomemo-m110s.drv
 FILES += glabels/generate.sh
 FILES += glabels/Makefile
 FILES += glabels/Phomemo_Q22.template

@@ -1,8 +1,11 @@
 #! /usr/bin/python3
 
 import os
+import re
 import socket
 import sys
+from itertools import chain
+from textwrap import wrap
 from urllib.parse import quote
 
 import dbus
@@ -10,6 +13,7 @@ import dbus
 bus = dbus.SystemBus()
 
 device_id = 'CLS:PRINTER;CMD:EPSON;DES:Thermal Printer;MFG:Phomemo;MDL:'
+
 def scan_bluetooth():
     try:
         bluez = bus.get_object('org.bluez', '/')
@@ -17,38 +21,38 @@ def scan_bluetooth():
         print("WARNING: no bluetooth interface", file=sys.stderr)
         return
 
+    re_name_pattern = re.compile(r'^(Mr\.in(.*)|Q[0-9]{3}[A-Z][0-9]{10}|T02)$')
+
     manager = dbus.Interface(bluez, 'org.freedesktop.DBus.ObjectManager')
 
     objects = manager.GetManagedObjects()
+    device_interface = dbus.String('org.bluez.Device1')
 
     for path, interfaces in objects.items():
-        if 'org.bluez.Device1' not in interfaces.keys():
+        properties = interfaces.get(device_interface, None)
+        if properties is None:
             continue
 
-        properties = interfaces['org.bluez.Device1']
-
-        try:
-            name = properties['Name']
-        except KeyError:
+        name = properties.get('Name', None)
+        if name is None or properties.get('Icon', None) != 'printer':
             continue
 
-        if (name.startswith('Mr.in')):
-            model = name[6:]
-        elif (name == 'T02'):
-            model = name
-        else:
+        m = re_name_pattern.match(name)
+        if not m:
             continue
+
+        model = m.group(2) or m.group(1)
 
         address = properties['Address']
-        device_uri = 'phomemo://' + address[0:2:]+address[3:5:]+address[6:8:]+address[9:11:]+address[12:14:]+address[15:17:]
+        device_uri = f'phomemo://{address.replace(":", "")}'
         device_make_and_model = 'Phomemo ' + model
 
-        print('direct ' + device_uri + ' "' + device_make_and_model + '" "' +
-              device_make_and_model + ' bluetooth ' + address + '" "' + device_id + model + ' (BT);"')
+        print(f'direct {device_uri} "{device_make_and_model}" "{device_make_and_model} bluetooth {address}" "{device_id}{model} (BT);"')
 
 class find_class(object):
     def __init__(self, class_):
         self._class = class_
+
     def __call__(self, device):
         # first, let's check the device
         if device.bDeviceClass == self._class:
@@ -67,7 +71,11 @@ class find_class(object):
         return False
 
 def scan_usb():
-    printers = usb.core.find(find_all=1, custom_match=find_class(7), idVendor=0x0493)
+    printers = chain(
+        usb.core.find(find_all=1, custom_match=find_class(7), idVendor=0x0493),
+        usb.core.find(find_all=1, custom_match=find_class(7), idVendor=0x0483),
+    )
+
     for printer in printers:
             for cfg in printer:
                 intf = usb.util.find_descriptor(cfg, bInterfaceClass=7)
@@ -79,14 +87,15 @@ def scan_usb():
                 model = 'M02'
             elif printer.idProduct == 0x8760:
                 model = 'M110'
+            elif printer.idProduct == 0x5740:
+                model = 'M110S'
             else:
-                model = 'Unknown(0x%04x)' % (printer.idProduct)
+                model = f'Unknown(0x{printer.idProduct:04x})'
             usb.util.get_langids(printer)
             SerialNumber = usb.util.get_string(printer, printer.iSerialNumber)
-            device_uri = 'usb://%s/%s?serial=%s&interface=%d' % (quote(printer.manufacturer), quote(printer.product), SerialNumber, Interface)
-            device_make_and_model = 'Phomemo ' + model
-            print('direct ' + device_uri + ' "' + device_make_and_model + '" "' +
-              device_make_and_model + ' USB ' + SerialNumber + '" "' + device_id + model + ' (USB);"')
+            device_uri = f'usb://{quote(printer.manufacturer)}/{quote(printer.product)}?serial={SerialNumber}&interface={Interface}'
+            device_make_and_model = f'Phomemo {model}'
+            print(f'direct {device_uri} "{device_make_and_model}" "{device_make_and_model} USB {SerialNumber}" "{device_id}{model} (USB);"')
 
 
 if len(sys.argv) == 1:
@@ -100,9 +109,8 @@ if len(sys.argv) == 1:
     scan_usb()
     exit(0)
 
-try:
-    device_uri = os.environ['DEVICE_URI']
-except:
+device_uri = os.environ.get('DEVICE_URI')
+if device_uri is None:
     exit(1)
 
 uri = device_uri.split('://')
@@ -110,10 +118,7 @@ uri = device_uri.split('://')
 if uri[0] != 'phomemo':
     exit(1)
 
-a = uri[1]
-bdaddr = a[0:2:] + ':' + a[2:4:] + ':' + a[4:6:] + ':' + a[6:8:] + ':' + a[8:10:] + ':' + a[10:12:]
-
-print('DEBUG: ' + sys.argv[0] +' device ' + bdaddr)
+bdaddr = ":".join(wrap(uri[1], 2))
 
 try:
     print('STATE: +connecting-to-device')
@@ -134,6 +139,7 @@ except OSError as btErr:
 except socket.error as SockErr:
     print("ERROR: Cannot write data: " + str(SockErr), file=sys.stderr)
     exit(1)
+
 try:
     # we need to wait the printer answer before closing the socket
     # otherwise the print is stopped
