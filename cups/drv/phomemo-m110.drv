@@ -29,49 +29,70 @@
 #media "w50h50/Label 50mmx50mm" 50mm 50mm
 #media "w50h70/Label 50mmx70mm" 50mm 70mm
 #media "w50h80/Label 50mmx80mm" 50mm 80mm
+#media "w70h80/Label 70mmx80mm" 70mm 80mm
+
+Manufacturer "Phomemo"
+Version 1.0
+DriverType label
+ColorDevice No
+Attribute "cupsSNMPSupplies" "" "false"
+HWMargins 1mm 0 1mm 0
+
+Filter "application/vnd.cups-raster 100 rastertopm110"
+*Resolution - 8 0 0 0 203dpi
+ColorModel Gray/Grayscale w chunky 0
+
+*MediaType 10 "LabelWithGaps/Label With Gaps"
+MediaType 11 "Continuous"
+MediaType 38 "LabelWithMarks/Label With Marks"
+
+MediaSize "w20h100"
+MediaSize "w20h10"
+MediaSize "w20h20"
+MediaSize "w25h10"
+MediaSize "w25h30"
+MediaSize "w25h38"
+MediaSize "w30h20"
+MediaSize "w30h25"
+MediaSize "w30h30"
+MediaSize "w35h15"
+MediaSize "w40h20"
+*MediaSize "w40h30"
+MediaSize "w40h40"
+MediaSize "w40h60"
+MediaSize "w40h80"
+MediaSize "w45h60"
+MediaSize "w50h20"
+MediaSize "w50h30"
+MediaSize "w50h50"
+MediaSize "w50h70"
+MediaSize "w50h80"
+
+VariablePaperSize Yes
+MinSize 0.00 0.00
+MaxSize 0.00 0.00
+
+Group "PrinterSettings/Printer Settings"
+  Option "negative/Invert Colors" Boolean AnySetup 10
+    Choice True/Yes  "<</NegativePrint true>>setpagedevice"
+   *Choice False/No "<</NegativePrint false>>setpagedevice"
 
 {
-  Manufacturer "Phomemo"
   ModelName "M110"
   PCFileName "Phomemo-M110.ppd"
-  Version 1.0
   Attribute "NickName" "" "Phomemo M110"
-  DriverType label
-  ColorDevice No
-  Attribute "cupsSNMPSupplies" "" "false"
-  HWMargins 1mm 0 1mm 0
+}
 
-  Filter "application/vnd.cups-raster 100 rastertopm110"
-  *Resolution - 8 0 0 0 203dpi
-  ColorModel Gray/Grayscale w chunky 0
+{
+  ModelName "M110S"
+  PCFileName "Phomemo-M110S.ppd"
+  Attribute "NickName" "" "Phomemo M110S"
+  HWMargins 0 0 0 0
+}
 
-  *MediaType 10 "LabelWithGaps/Label With Gaps"
-  MediaType 11 "Continuous"
-  MediaType 38 "LabelWithMarks/Label With Marks"
-
-  MediaSize "w20h100"
-  MediaSize "w20h10"
-  MediaSize "w20h20"
-  MediaSize "w25h10"
-  MediaSize "w25h30"
-  MediaSize "w25h38"
-  MediaSize "w30h20"
-  MediaSize "w30h25"
-  MediaSize "w30h30"
-  MediaSize "w35h15"
-  MediaSize "w40h20"
-  *MediaSize "w40h30"
-  MediaSize "w40h40"
-  MediaSize "w40h60"
-  MediaSize "w40h80"
-  MediaSize "w45h60"
-  MediaSize "w50h20"
-  MediaSize "w50h30"
-  MediaSize "w50h50"
-  MediaSize "w50h70"
-  MediaSize "w50h80"
-
-  VariablePaperSize Yes
-  MinSize 0.00 0.00
-  MaxSize 0.00 0.00
+{
+  ModelName "M220"
+  PCFileName "Phomemo-M220.ppd"
+  Attribute "NickName" "" "Phomemo M220"
+  MediaSize "w70h80"
 }

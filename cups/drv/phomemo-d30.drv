@@ -29,13 +29,25 @@ VariablePaperSize Yes
 MinSize 0.00 0.00
 MaxSize 0.00 0.00
 
-Option "FeedLines/Feed Lines for Tearing" PickOne DocumentSetup 20.0
-Attribute CustomFeedLines True "<</AdvanceDistance 3 -1 roll>>setpagedevice"
-Attribute ParamCustomFeedLines Lines "1 int 0 20"
+Group "PrinterSettings/Printer Settings"
+  Option "FeedLines/Feed Lines for Tearing" PickOne DocumentSetup 10
+    *Choice "Default/Default (2)" "<</AdvanceDistance 2>>setpagedevice"
+    Attribute CustomFeedLines True "<</AdvanceDistance 3 -1 roll>>setpagedevice"
+    Attribute ParamCustomFeedLines Lines "1 int 0 20"
+
+  Option "negative/Invert Colors" Boolean AnySetup 10
+    Choice True/Yes  "<</NegativePrint true>>setpagedevice"
+   *Choice False/No "<</NegativePrint false>>setpagedevice"
+
 {
   Attribute "NickName" "" "Phomemo D30"
   ModelName "D30"
   PCFileName "Phomemo-D30.ppd"
-  Option "FeedLines" PickOne DocumentSetup 20.0
-  *Choice "Default/Default (2)" "<</AdvanceDistance 2>>setpagedevice"
+}
+
+{
+  Attribute "NickName" "" "Phomemo D35"
+  ModelName "D35"
+  PCFileName "Phomemo-D35.ppd"
+  HWMargins 0 0 0 0
 }

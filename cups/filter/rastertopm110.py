@@ -72,7 +72,7 @@ def select_density(file, density = 10):
     return
 
 def select_media_type(file, media_type):
-    file.write(b'\x1f' + b'\x11') # select Media Type, 
+    file.write(b'\x1f' + b'\x11') # select Media Type,
     file.write(media_type.to_bytes(1, 'little'))
     return
 
@@ -109,13 +109,17 @@ for i, datatuple in enumerate(pages):
 
     im = Image.frombuffer(mode='L', data=imgdata,
                           size=(header.cupsWidth, header.cupsHeight))
-    im = ImageOps.invert(im)
+
+    if not header.NegativePrint:
+        # For normal printing, invert the image (printer expects inverted data)
+        im = ImageOps.invert(im)
+
     im = im.convert('1')
 
     line = 0
-    
+
     with os.fdopen(sys.stdout.fileno(), "wb", closefd=False) as stdout:
         print_header(stdout,header.cupsMediaType)
         lines = im.height
         print_raster(stdout, im, line, lines)
-        print_footer(stdout) 
+        print_footer(stdout)

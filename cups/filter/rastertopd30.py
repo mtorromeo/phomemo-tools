@@ -89,7 +89,11 @@ for i, datatuple in enumerate(pages):
 
     im = Image.frombuffer(mode='L', data=imgdata,
                           size=(header.cupsWidth, header.cupsHeight))
-    im = ImageOps.invert(im)
+
+    if not header.NegativePrint:
+        # For normal printing, invert the image (printer expects inverted data)
+        im = ImageOps.invert(im)
+        
     im = im.convert('1')
     im = im.transpose(Image.ROTATE_90)
 
