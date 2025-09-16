@@ -18,7 +18,7 @@ ColorDevice No
 Attribute "cupsSNMPSupplies" "" "false"
 HWMargins 1mm 0 1mm 0
 
-Filter "application/vnd.cups-raster 100 rastertopd30"
+Filter "application/vnd.cups-raster 100 rastertopd3x"
 *Resolution - 8 0 0 0 203dpi
 ColorModel Gray/Grayscale w chunky 0
 
@@ -40,14 +40,7 @@ Group "PrinterSettings/Printer Settings"
    *Choice False/No "<</NegativePrint false>>setpagedevice"
 
 {
-  Attribute "NickName" "" "Phomemo D30"
-  ModelName "D30"
-  PCFileName "Phomemo-D30.ppd"
-}
-
-{
-  Attribute "NickName" "" "Phomemo D35"
-  ModelName "D35"
-  PCFileName "Phomemo-D35.ppd"
-  HWMargins 0 0 0 0
+  Attribute "NickName" "" "Phomemo D30/D35"
+  ModelName "D30/D35"
+  PCFileName "Phomemo-D3X.ppd"
 }

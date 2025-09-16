@@ -47,16 +47,14 @@ semanage permissive -a cupsd_t
 /usr/share/phomemo/phomemo-q22.xml
 /usr/share/phomemo/phomemo-filter.py
 /usr/share/phomemo/format-checker.py
-/usr/share/cups/model/Phomemo/Phomemo-D30.ppd.gz
-/usr/share/cups/model/Phomemo/Phomemo-D35.ppd.gz
+/usr/share/cups/model/Phomemo/Phomemo-D3X.ppd.gz
 /usr/share/cups/model/Phomemo/Phomemo-M02.ppd.gz
 /usr/share/cups/model/Phomemo/Phomemo-M02Pro.ppd.gz
 /usr/share/cups/model/Phomemo/Phomemo-T02.ppd.gz
 /usr/share/cups/model/Phomemo/Phomemo-M110.ppd.gz
 /usr/share/cups/model/Phomemo/Phomemo-M220.ppd.gz
 /usr/share/cups/model/Phomemo/Phomemo-M110S.ppd.gz
-/usr/share/cups/drv/phomemo-d30.drv
-/usr/share/cups/drv/phomemo-d35.drv
+/usr/share/cups/drv/phomemo-d3x.drv
 /usr/share/cups/drv/phomemo-m02_t02.drv
 /usr/share/cups/drv/phomemo-m02pro.drv
 /usr/share/cups/drv/phomemo-m110.drv
@@ -64,7 +62,7 @@ semanage permissive -a cupsd_t
 /usr/share/cups/drv/phomemo-m110s.drv
 /usr/lib/cups/filter/rastertopm02_t02
 /usr/lib/cups/filter/rastertopm110
-/usr/lib/cups/filter/rastertopd30
+/usr/lib/cups/filter/rastertopd3x
 /usr/lib/cups/backend/phomemo
 
 %files images
