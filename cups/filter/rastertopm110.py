@@ -1,48 +1,138 @@
 #! /usr/bin/env python3
 
-import sys, os
-from collections import namedtuple
+import os
+import sys
+from io import BufferedWriter
 from struct import unpack
+from typing import NamedTuple
 
 from PIL import Image, ImageOps
 
 ESC = b'\x1b'
 GS  = b'\x1d'
 
-CupsRas3 = namedtuple(
+class CupsRasterPageHeader(NamedTuple):
     # Documentation at https://www.cups.org/doc/spec-raster.html
-    'CupsRas3',
-    'MediaClass MediaColor MediaType OutputType AdvanceDistance AdvanceMedia Collate CutMedia Duplex HWResolutionH '
-    'HWResolutionV ImagingBoundingBoxL ImagingBoundingBoxB ImagingBoundingBoxR ImagingBoundingBoxT '
-    'InsertSheet Jog LeadingEdge MarginsL MarginsB ManualFeed MediaPosition MediaWeight MirrorPrint '
-    'NegativePrint NumCopies Orientation OutputFaceUp PageSizeW PageSizeH Separations TraySwitch Tumble cupsWidth '
-    'cupsHeight cupsMediaType cupsBitsPerColor cupsBitsPerPixel cupsBitsPerLine cupsColorOrder cupsColorSpace '
-    'cupsCompression cupsRowCount cupsRowFeed cupsRowStep cupsNumColors cupsBorderlessScalingFactor cupsPageSizeW '
-    'cupsPageSizeH cupsImagingBBoxL cupsImagingBBoxB cupsImagingBBoxR cupsImagingBBoxT cupsInteger1 cupsInteger2 '
-    'cupsInteger3 cupsInteger4 cupsInteger5 cupsInteger6 cupsInteger7 cupsInteger8 cupsInteger9 cupsInteger10 '
-    'cupsInteger11 cupsInteger12 cupsInteger13 cupsInteger14 cupsInteger15 cupsInteger16 cupsReal1 cupsReal2 '
-    'cupsReal3 cupsReal4 cupsReal5 cupsReal6 cupsReal7 cupsReal8 cupsReal9 cupsReal10 cupsReal11 cupsReal12 '
-    'cupsReal13 cupsReal14 cupsReal15 cupsReal16 cupsString1 cupsString2 cupsString3 cupsString4 cupsString5 '
-    'cupsString6 cupsString7 cupsString8 cupsString9 cupsString10 cupsString11 cupsString12 cupsString13 cupsString14 '
-    'cupsString15 cupsString16 cupsMarkerType cupsRenderingIntent cupsPageSizeName'
-)
+    # Order MUST match the unpack format string below
+    MediaClass: str
+    MediaColor: str
+    MediaType: str
+    OutputType: str
+    AdvanceDistance: int
+    AdvanceMedia: int
+    Collate: int
+    CutMedia: int
+    Duplex: int
+    HWResolutionH: int
+    HWResolutionV: int
+    ImagingBoundingBoxL: int
+    ImagingBoundingBoxB: int
+    ImagingBoundingBoxR: int
+    ImagingBoundingBoxT: int
+    InsertSheet: int
+    Jog: int
+    LeadingEdge: int
+    MarginsL: int
+    MarginsB: int
+    ManualFeed: int
+    MediaPosition: int
+    MediaWeight: int
+    MirrorPrint: int
+    NegativePrint: int
+    NumCopies: int
+    Orientation: int
+    OutputFaceUp: int
+    PageSizeW: int
+    PageSizeH: int
+    Separations: int
+    TraySwitch: int
+    Tumble: int
+    cupsWidth: int
+    cupsHeight: int
+    cupsMediaType: int
+    cupsBitsPerColor: int
+    cupsBitsPerPixel: int
+    cupsBitsPerLine: int
+    cupsColorOrder: int
+    cupsColorSpace: int
+    cupsCompression: int
+    cupsRowCount: int
+    cupsRowFeed: int
+    cupsRowStep: int
+    cupsNumColors: int
+    cupsBorderlessScalingFactor: float
+    cupsPageSizeW: float
+    cupsPageSizeH: float
+    cupsImagingBBoxL: float
+    cupsImagingBBoxB: float
+    cupsImagingBBoxR: float
+    cupsImagingBBoxT: float
+    cupsInteger1: int
+    cupsInteger2: int
+    cupsInteger3: int
+    cupsInteger4: int
+    cupsInteger5: int
+    cupsInteger6: int
+    cupsInteger7: int
+    cupsInteger8: int
+    cupsInteger9: int
+    cupsInteger10: int
+    cupsInteger11: int
+    cupsInteger12: int
+    cupsInteger13: int
+    cupsInteger14: int
+    cupsInteger15: int
+    cupsInteger16: int
+    cupsReal1: float
+    cupsReal2: float
+    cupsReal3: float
+    cupsReal4: float
+    cupsReal5: float
+    cupsReal6: float
+    cupsReal7: float
+    cupsReal8: float
+    cupsReal9: float
+    cupsReal10: float
+    cupsReal11: float
+    cupsReal12: float
+    cupsReal13: float
+    cupsReal14: float
+    cupsReal15: float
+    cupsReal16: float
+    cupsString1: str
+    cupsString2: str
+    cupsString3: str
+    cupsString4: str
+    cupsString5: str
+    cupsString6: str
+    cupsString7: str
+    cupsString8: str
+    cupsString9: str
+    cupsString10: str
+    cupsString11: str
+    cupsString12: str
+    cupsString13: str
+    cupsString14: str
+    cupsString15: str
+    cupsString16: str
+    cupsMarkerType: str
+    cupsRenderingIntent: str
+    cupsPageSizeName: str
 
-def read_ras3(rdata):
+def read_ras3(rdata: bytes):
     if not rdata:
         raise ValueError('No data received')
 
     # Check for magic word (either big-endian or little-endian)
-    magic = unpack('@4s', rdata[0:4])[0]
+    magic: bytes = unpack('@4s', rdata[0:4])[0]
     if magic != b'RaS3' and magic != b'3SaR':
         raise ValueError("This is not in RaS3 format")
     rdata = rdata[4:]  # Strip magic word
-    pages = []
+    pages: list[tuple[CupsRasterPageHeader, bytes]] = []
 
     while rdata:  # Loop over all pages
         struct_data = unpack(
-            '@64s 64s 64s 64s I I I I I II IIII I I I II I I I I I I I I II I I I I I I I I I I I I I '
-            'I I I f ff ffff IIIIIIIIIIIIIIII ffffffffffffffff 64s 64s 64s 64s 64s 64s 64s 64s 64s 64s '
-            '64s 64s 64s 64s 64s 64s 64s 64s 64s',
+            '@64s 64s 64s 64s I I I I I II IIII I I I II I I I I I I I I II I I I I I I I I I I I I I I I I f ff ffff IIIIIIIIIIIIIIII ffffffffffffffff 64s 64s 64s 64s 64s 64s 64s 64s 64s 64s 64s 64s 64s 64s 64s 64s 64s 64s 64s',
             rdata[0:1796]
         )
         data = [
@@ -50,7 +140,7 @@ def read_ras3(rdata):
             b.decode().rstrip('\x00') if isinstance(b, bytes) else b
             for b in struct_data
         ]
-        header = CupsRas3._make(data)
+        header = CupsRasterPageHeader._make(data)
 
         # Read image data of this page into a bytearray
         imgdata = rdata[1796:1796 + (header.cupsWidth * header.cupsHeight * header.cupsBitsPerPixel // 8)]
@@ -61,43 +151,43 @@ def read_ras3(rdata):
 
     return pages
 
-def select_speed(file, speed = 5):
-    file.write(ESC + b'\x4e' + b'\x0d') # select Print Speed
-    file.write(speed.to_bytes(1, 'little'))
+def select_speed(file: BufferedWriter, speed: int = 5):
+    _ = file.write(ESC + b'\x4e' + b'\x0d') # select Print Speed
+    _ = file.write(speed.to_bytes(1, 'little'))
     return
 
-def select_density(file, density = 10):
-    file.write(ESC + b'\x4e' + b'\x04') # select Print Speed
-    file.write(density.to_bytes(1, 'little'))
+def select_density(file: BufferedWriter, density: int = 10):
+    _ = file.write(ESC + b'\x4e' + b'\x04') # select Print Speed
+    _ = file.write(density.to_bytes(1, 'little'))
     return
 
-def select_media_type(file, media_type):
-    file.write(b'\x1f' + b'\x11') # select Media Type,
-    file.write(media_type.to_bytes(1, 'little'))
+def select_media_type(file: BufferedWriter, media_type: int):
+    _ = file.write(b'\x1f' + b'\x11') # select Media Type,
+    _ = file.write(media_type.to_bytes(1, 'little'))
     return
 
-def print_header(file, media_type = 10):
+def print_header(file: BufferedWriter, media_type: int = 10):
     select_speed(file, 5)
     select_density(file, 10)
     select_media_type(file, media_type)
     return
 
-def print_raster(file, image, line, lines = 0xff, mode = 0):
-    file.write(GS + b'v0')   # GS v 0 : print raster bit image
+def print_raster(file: BufferedWriter, image: Image.Image, line: int, lines: int = 0xff, mode: int = 0):
+    _ = file.write(GS + b'v0')   # GS v 0 : print raster bit image
     # 0: normal, 1 double width, 2 double heigh, 3 quadruple
-    file.write(mode.to_bytes(1, 'little'))
+    _ = file.write(mode.to_bytes(1, 'little'))
     # number of bytes / line
-    file.write(int((image.width + 7) / 8).to_bytes(2, 'little'))
+    _ = file.write(int((image.width + 7) / 8).to_bytes(2, 'little'))
     # nulber of lines in the image
-    file.write(lines.to_bytes(2, 'little'))
+    _ = file.write(lines.to_bytes(2, 'little'))
     # bit image
     block = image.crop((0, line, image.width, line + lines))
-    stdout.write(block.tobytes())
+    _ = stdout.write(block.tobytes())
     return
 
-def print_footer(file):
-    file.write(b'\x1f' + b'\xf0' + b'\x05' + b'\x00')
-    file.write(b'\x1f' + b'\xf0' + b'\x03' + b'\x00')
+def print_footer(file: BufferedWriter):
+    _ = file.write(b'\x1f' + b'\xf0' + b'\x05' + b'\x00')
+    _ = file.write(b'\x1f' + b'\xf0' + b'\x03' + b'\x00')
 
 pages = read_ras3(sys.stdin.buffer.read())
 

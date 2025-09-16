@@ -16,7 +16,7 @@ Version 2.0
 DriverType label
 ColorDevice No
 Attribute "cupsSNMPSupplies" "" "false"
-HWMargins 1mm 0 1mm 0
+HWMargins 0 0 0 0
 
 Filter "application/vnd.cups-raster 100 rastertopd3x"
 *Resolution - 8 0 0 0 203dpi
